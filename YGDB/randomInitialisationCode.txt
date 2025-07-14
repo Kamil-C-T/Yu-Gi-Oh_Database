@@ -1,0 +1,362 @@
+BufferedImage img;
+ImagePanel imgPnl;
+this.setTitle("YGDB");
+this.setSize(1280,720);
+Container contentPane = this.getContentPane();
+SpringLayout layout = new SpringLayout();
+contentPane.setLayout(layout);
+try {
+    img = ImageIO.read(new File("img/bg.jpg"));
+    imgPnl = new ImagePanel(img);
+    contentPane.add(imgPnl);
+} catch (IOException e) {
+
+}        
+JSeparator vertSep = new JSeparator();
+vertSep.setOrientation(SwingConstants.VERTICAL);
+vertSep.setPreferredSize(new Dimension(25, 1280));
+JLabel label = new JLabel("Label: ");
+JTextField tField = new JTextField("Text field", 15);
+
+JPanel panel1 = new JPanel();
+SpringLayout layoutP1 = new SpringLayout();
+panel1.setLayout(layoutP1);
+panel1.setBackground(Color.YELLOW);
+panel1.setPreferredSize(new Dimension(1280, 720));
+JPanel panel2 = new JPanel();
+panel2.setLayout(layoutP1);
+panel2.setBackground(Color.RED);
+panel2.setPreferredSize(new Dimension(1280, 720));
+JPanel panel3 = new JPanel();
+panel3.setLayout(layoutP1);
+panel3.setBackground(Color.BLUE);
+panel3.setPreferredSize(new Dimension(1280, 720));
+JPanel panel4 = new JPanel();
+panel4.setLayout(layoutP1);
+panel4.setBackground(Color.MAGENTA);
+panel4.setPreferredSize(new Dimension(1280, 720));
+JPanel panel5 = new JPanel();
+panel5.setLayout(layoutP1);
+panel5.setBackground(Color.WHITE);
+panel5.setPreferredSize(new Dimension(1280, 720));
+JPanel panel6 = new JPanel();
+panel6.setLayout(layoutP1);
+panel6.setBackground(Color.BLACK);
+panel6.setPreferredSize(new Dimension(1280, 720));
+JPanel panel7 = new JPanel();
+panel7.setLayout(layoutP1);
+panel7.setBackground(Color.LIGHT_GRAY);
+panel7.setPreferredSize(new Dimension(1280, 720));
+JPanel panel8 = new JPanel();
+panel8.setLayout(layoutP1);
+panel8.setBackground(Color.CYAN);
+panel8.setPreferredSize(new Dimension(1280, 720));
+JPanel panel9 = new JPanel();
+panel9.setLayout(layoutP1);
+panel9.setBackground(Color.GREEN);
+panel9.setPreferredSize(new Dimension(1280, 720));
+JPanel panel10 = new JPanel();
+panel10.setLayout(layoutP1);
+panel10.setBackground(Color.PINK);
+panel10.setPreferredSize(new Dimension(1280, 720));
+JTabbedPane tabbedPane = new JTabbedPane();
+tabbedPane.setBounds(0,0,1280,720);
+tabbedPane.setSize(1280, 720);
+tabbedPane.add("Normal Monsters", panel1);
+tabbedPane.add("Effect Monsters", panel2);
+tabbedPane.add("Ritual Monsters", panel3);
+tabbedPane.add("Fusion Monsters", panel4);
+tabbedPane.add("Synchro Monsters", panel5);
+tabbedPane.add("Xyz Monsters", panel6);
+tabbedPane.add("Pendulum Monsters", panel7);
+tabbedPane.add("Link Monsters", panel8);
+tabbedPane.add("Spells", panel9);
+tabbedPane.add("Traps", panel10);
+
+contentPane.add(tabbedPane);
+panel1.add(label);
+panel1.add(tField);
+panel1.add(vertSep);
+layout.putConstraint(SpringLayout.WEST, tabbedPane, 0, SpringLayout.WEST, contentPane);
+layout.putConstraint(SpringLayout.NORTH, tabbedPane, 0, SpringLayout.NORTH, contentPane);
+layoutP1.putConstraint(SpringLayout.WEST, label, 5, SpringLayout.WEST, contentPane);
+layoutP1.putConstraint(SpringLayout.NORTH, label, 0, SpringLayout.NORTH, contentPane);
+layoutP1.putConstraint(SpringLayout.WEST, tField, 55, SpringLayout.WEST, contentPane);
+layoutP1.putConstraint(SpringLayout.NORTH, tField, 0, SpringLayout.NORTH, contentPane);
+layoutP1.putConstraint(SpringLayout.WEST, vertSep, (int)(this.getSize().width * 0.75), SpringLayout.WEST, contentPane);
+layoutP1.putConstraint(SpringLayout.NORTH, vertSep, 0, SpringLayout.NORTH, contentPane);
+this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+this.setVisible(true);
+YGDB window = this;
+this.addComponentListener(new ComponentAdapter() {
+    public void componentResized(ComponentEvent e) {
+        //This is only called when the user releases the mouse button
+        tabbedPane.setSize(new Dimension(window.getSize().width, window.getSize().height));
+        panel1.setSize(new Dimension(window.getSize().width, window.getSize().height));
+        layoutP1.putConstraint(SpringLayout.WEST, label, 5, SpringLayout.WEST, contentPane);
+        layoutP1.putConstraint(SpringLayout.NORTH, label, 0, SpringLayout.NORTH, contentPane);
+        layoutP1.putConstraint(SpringLayout.WEST, tField, 55, SpringLayout.WEST, contentPane);
+        layoutP1.putConstraint(SpringLayout.NORTH, tField, 0, SpringLayout.NORTH, contentPane);
+        layoutP1.putConstraint(SpringLayout.WEST, vertSep, (int)(panel1.getSize().width * 0.75), SpringLayout.WEST, contentPane);
+        layoutP1.putConstraint(SpringLayout.NORTH, vertSep, 0, SpringLayout.NORTH, contentPane);
+    }
+});
+
+//How to parse the JSON after pulling results from the YGOProdeck API
+try {
+    System.out.println("-------- Creating JSON file --------");
+    URL oracle = new URL("https://db.ygoprodeck.com/api/v7/cardinfo.php");
+    URLConnection connect = oracle.openConnection();
+    BufferedReader in = new BufferedReader(new InputStreamReader(connect.getInputStream()));
+
+    String inputLine;
+    FileWriter file = new FileWriter("data/currResult.json");
+    while ((inputLine = in.readLine()) != null)
+        file.write(inputLine.toString() + '\n');
+    in.close();
+    file.close();
+
+    System.out.println("FINSIHED. FIND IN: currResult.json");
+    System.out.println("-------- Reading JSON file --------");
+    JSONParser jsonParser = new JSONParser();
+    JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader("data/currResult.json"));
+    JSONArray data = (JSONArray) jsonObject.get("data");
+    int cap = data.size();
+    System.out.println("Length of the array is " + cap);
+    FileWriter outFile = new FileWriter("data/FullDB.txt");
+    for(int i = 0; i < cap; i++) {
+        JSONObject jsonObjectRow = (JSONObject) data.get(i);
+        String name = (String) jsonObjectRow.get("name");
+        String _type = (String) jsonObjectRow.get("type");
+        outFile.write(name + " is of type " + _type + "\n");
+    }
+    outFile.close();
+    System.out.println("FINSIHED. SEE FullDB.txt IN data");
+} catch (Exception e) {
+    e.printStackTrace();
+}
+
+//Download all images from the YGOProdeck API
+int i = 0;
+int j = 0;
+JSONParser jParse = null;
+JSONObject jObj = null;
+JSONArray data = null;
+int cap = 0;
+int imgCap = 0;
+JSONObject currRow = null;
+JSONArray images = null;
+JSONObject currEntry = null;
+String croppedURLString = null;
+Long imageId = 0L;
+String filename = null;
+URL croppedURL = null;
+BufferedImage cardImage = null;
+PrintWriter writer = null;
+PrintWriter secondWriter = null;
+try {
+    writer = new PrintWriter("data/cardsWithoutImages.txt");
+    secondWriter = new PrintWriter("data/downloadTrace.txt");
+    jParse = new JSONParser();
+    jObj = (JSONObject) jParse.parse(new FileReader("data/fullDB.json"));
+    data = (JSONArray) jObj.get("data");
+    cap = data.size();
+    System.out.println("Total cards: " + cap);
+    for(;i < cap;i++) {
+        try {
+            currRow = (JSONObject) data.get(i);
+            images = (JSONArray) currRow.get("card_images");
+            imgCap = images.size();
+            j = 0;
+            System.out.println("Length of image array for " + currRow.get("name") + ": " + imgCap);
+            for(;j < imgCap;j++) {
+                try {
+                    currEntry = (JSONObject) images.get(j);
+                    croppedURLString = (String) currEntry.get("image_url_cropped");
+                    imageId = (Long) currEntry.get("id");
+                    filename = "img/cardArt/" + imageId.toString() + ".jpg";
+                    secondWriter.println(filename);
+                    TimeUnit.MILLISECONDS.sleep(50);
+                    croppedURL = new URL(croppedURLString);
+                    cardImage = ImageIO.read(croppedURL);
+                    ImageIO.write(cardImage, "jpg", new File(filename));
+                } catch (IIOException e) {
+                    writer.println("Unable to save image of " + imageId);
+                }
+            }
+            currRow = null;
+            images = null;
+            currEntry = null;
+            croppedURLString = null;
+            imageId = null;
+            filename = null;
+            croppedURL = null;
+            cardImage = null;
+            TimeUnit.MILLISECONDS.sleep(225);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+} catch(Exception e) {
+    e.printStackTrace();
+}
+writer.close();
+secondWriter.close();
+Toolkit.getDefaultToolkit().beep();
+
+//Basic UI stuff for post startup
+JTabbedPane home = new JTabbedPane();
+home.setOpaque(false);
+BufferedImage srchImg;
+BufferedImage resImg;
+BufferedImage homeImg;
+ImagePanel resPnl;
+ImagePanel bgPnl;
+ImagePanel searchPnl;
+Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+this.setTitle("YGDB");
+this.setSize((int)size.getWidth(),(int)size.getHeight());
+this.setUndecorated(true);
+Container contentPane = this.getContentPane();
+SpringLayout layout = new SpringLayout();
+contentPane.setLayout(layout);
+try {
+    Font nameFont = Font.createFont(Font.TRUETYPE_FONT, new File("img/fonts/ygoCardNames.ttf"));
+
+    //contentPane.add(home);
+    srchImg = ImageIO.read(new File("img/system/searchBg.jpg"));
+    resImg = ImageIO.read(new File("img/system/resultsBg.jpg"));
+    homeImg = ImageIO.read(new File("img/system/homeBg.jpg"));
+
+    resPnl = new ImagePanel(resImg);
+    bgPnl = new ImagePanel(homeImg);
+    searchPnl = new ImagePanel(srchImg);
+    contentPane.add(bgPnl);
+    home.addTab("Search", searchPnl);
+    home.addTab("Results", resPnl);
+    resPnl.setLayout(layout);
+    JLabel levelStarOne = new JLabel(new ImageIcon("img/cardInfo/monsLvl.png"));
+    JLabel rightPendScale = new JLabel(new ImageIcon("img/cardInfo/PendRight.png"));
+
+    JLabel cardName = new JLabel(); 
+    cardName.setIcon(new ImageIcon("img/system/monsterNameBG.jpg"));
+    cardName.setFont(nameFont.deriveFont(23f));
+    cardName.setText("D/D/D/D Super-Dimensional Sovereign Emperor Zero Paradox");
+    cardName.setForeground(Color.BLACK);
+    cardName.setVerticalTextPosition(JLabel.CENTER);
+    cardName.setHorizontalTextPosition(JLabel.CENTER);
+    cardName.setIconTextGap(0);
+    cardName.setHorizontalAlignment(SwingConstants.CENTER);
+    
+
+    JLabel cardArt = new JLabel(); 
+    cardArt.setPreferredSize(new Dimension(468, 468));
+    cardArt.setOpaque(true);
+    cardArt.setBackground(Color.WHITE);
+    cardArt.setForeground(Color.RED);
+    cardArt.setBorder(BorderFactory.createTitledBorder("The Card Art"));
+    cardArt.setText("<html>This is test to see if word wrapping happens automatically in html JLabel text. I hope this text goes on forever and ever and ever so that it can in fact wrap around this text box. If it cannot, I will be very sad. I also need to make more progress on this YGO database as I am simply pissing around right now.</html>");
+
+    layout.putConstraint(SpringLayout.WEST, cardArt, (int)((resPnl.getWidth()/2) - (cardArt.getPreferredSize().getWidth()/2)), SpringLayout.WEST, resPnl);
+    layout.putConstraint(SpringLayout.NORTH, cardArt, (int)(cardName.getPreferredSize().getHeight() + levelStarOne.getPreferredSize().getHeight() + 7), SpringLayout.NORTH, resPnl);
+
+    layout.putConstraint(SpringLayout.WEST, levelStarOne, (int)((resPnl.getWidth()/2 + cardArt.getPreferredSize().getWidth()/2) - (levelStarOne.getPreferredSize().getWidth())), SpringLayout.WEST, resPnl);
+    layout.putConstraint(SpringLayout.NORTH, levelStarOne, (int)(cardName.getPreferredSize().getHeight() + 6), SpringLayout.NORTH, resPnl);
+
+    layout.putConstraint(SpringLayout.WEST, cardName, (int)((resPnl.getWidth()/2) - (cardArt.getPreferredSize().getWidth()/2)), SpringLayout.WEST, resPnl);
+    layout.putConstraint(SpringLayout.NORTH, cardName, 5, SpringLayout.NORTH, resPnl);
+
+    layout.putConstraint(SpringLayout.WEST, rightPendScale, 0, SpringLayout.WEST, resPnl);
+    layout.putConstraint(SpringLayout.NORTH, rightPendScale, 55, SpringLayout.NORTH, resPnl);
+
+    resPnl.add(cardName);
+    resPnl.add(cardArt);
+    resPnl.add(levelStarOne);
+    resPnl.add(rightPendScale);
+    List<String> test = new ArrayList<String>();
+    test.add("");
+    test.add("Dark Magician");
+    test.add("Dark Magician Girl");
+    test.add("Dark Magic Attack");
+    test.add("Revealer of the Ice Barrier");
+    test.add("Medallion of the Ice Barrier");
+    test.add("Ice Barrier");
+    test.add("D/D/D/D Super-Dimensional Sovereign Emperor Zero Paradox");
+    FilterComboBox comboBox = new FilterComboBox(test);
+    comboBox.setEditable(true);
+    comboBox.setSelectedItem("");
+
+    comboBox.setBounds(56, 84, 300, 36);
+    //comboBox.setPreferredSize(new Dimension(239, 36));
+    comboBox.setFont(nameFont.deriveFont(23f));
+    resPnl.add(comboBox);
+} catch (IOException e) {
+    System.out.println("Fucking errors...");
+} catch (FontFormatException e) {
+    System.out.println("Didn't get the font!");
+}
+
+//To enable and disable various components
+pendScale.setEnabled(false);
+
+//To get whether a text field is empty or not
+textFieldName.getText().isEmpty();
+
+//Potentially helpful: change icon of checkbox when selected
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+
+import javax.swing.AbstractButton;
+import javax.swing.ButtonModel;
+import javax.swing.Icon;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+
+class CheckBoxIcon implements Icon {
+  public void paintIcon(Component component, Graphics g, int x, int y) {
+    AbstractButton abstractButton = (AbstractButton)component;
+    ButtonModel buttonModel = abstractButton.getModel();
+    
+    Color color = buttonModel.isSelected() ?  Color.BLUE : Color.RED;
+    g.setColor(color);
+    
+    g.drawRect(1, 1, 20,20);
+    
+  }
+  public int getIconWidth() {
+    return 20;
+  }
+  public int getIconHeight() {
+    return 20;
+  }
+}
+
+public class IconCheckBoxSample {
+  public static void main(String args[]) {
+        JFrame frame = new JFrame("Iconizing CheckBox");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Icon checked = new CheckBoxIcon();
+        Icon unchecked = new CheckBoxIcon();
+        JCheckBox aCheckBox1 = new JCheckBox("Pizza", unchecked);
+        aCheckBox1.setSelectedIcon(checked);
+        JCheckBox aCheckBox2 = new JCheckBox("Calzone");
+        aCheckBox2.setIcon(unchecked);
+        aCheckBox2.setSelectedIcon(checked);
+        Icon checkBoxIcon = new CheckBoxIcon();
+        JCheckBox aCheckBox3 = new JCheckBox("Anchovies", checkBoxIcon);
+        JCheckBox aCheckBox4 = new JCheckBox("Stuffed Crust", checked);
+        frame.setLayout(new GridLayout(0,1));
+        frame.add(aCheckBox1);
+        frame.add(aCheckBox2);
+        frame.add(aCheckBox3);
+        frame.add(aCheckBox4);
+        frame.setSize(300, 200);
+        frame.setVisible(true);
+  }
+}

@@ -1,0 +1,10 @@
+{
+    "java.debug.settings.console": "internalConsole",
+    "java.project.sourcePaths": [
+        "."
+    ],
+    "java.project.referencedLibraries": [
+        "Libraries/*.jar",
+        "Libraries\\swingx-core-1.6.5-1.jar"
+    ]
+}
